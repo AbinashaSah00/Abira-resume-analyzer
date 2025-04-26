@@ -1,0 +1,6 @@
+Job Title: Data Analyst
+
+Requirements:
+- Proficient in SQL and Python
+- Experience with Excel and Power BI
+- Strong analytical skills

@@ -1,0 +1,1 @@
+# Logic to compare and score resume against JD
