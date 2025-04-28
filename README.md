@@ -16,17 +16,34 @@ It extracts key information (like email, phone, skills) from resumes and matches
 ## 🗂️ Folder Structure
 
 ```
-Resume Analyzer/
+Resume_Analyzer/
 │
-├── data/                # Store resumes and JD texts
-├── extractor.py         # Functions to extract email, phone, skills
-├── resume_parser.py     # Function to extract text from resume PDFs
+├── core/
+│   ├── analyzer.py
+│   ├── extractor.py
+│   ├── jd_parser.py
+│   ├── matcher.py
+│   ├── resume_parser.py
+│   ├── tracker.py
+│
+├── data/
+│   ├── Abinasha sahoo-Resume old.pdf
+│   ├── Abinasha_Sahoo_Resume.pdf
+│   ├── sample_jd.txt
+│   ├── sample_resume.pdf
+│
+├── output/
+│   ├── applications_log.csv
+│   ├── resume_analysis_results.csv
+│
 ├── utils/
-│   └── text_utils.py    # Functions for cleaning and text processing
-├── skills_database.csv  # Skill set for matching
-├── resume_analysis_results.csv  # Output file with match result
-├── main.py              # Main application file
-└── README.md            # Project documentation
+│   └── text_utils.py
+│
+├── .gitignore
+├── main.py
+├── README.md
+├── requirements.txt
+
 ```
 
 ---
