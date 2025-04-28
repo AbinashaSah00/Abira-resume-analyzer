@@ -116,3 +116,4 @@ Resume_Analyzer/
 
 - GitHub: [abinashsahoo00](https://github.com/abinashsahoo00)
 - LinkedIn: [Abinash Sahoo](https://www.linkedin.com/in/abinash-sahoo/)
+- LinkedIn: [Abinash Sahoo]([https://www.linkedin.com/in/abinash-sahoo/](https://www.notion.so/Hey-there-I-am-Abinash-Sahoo-1dfe544fcbea80ef973eec9fd705f513?pvs=4))
