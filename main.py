@@ -2,94 +2,109 @@
 
 import os
 import csv
-from core.resume_parser import extract_resume_text
+from datetime import datetime
+from core.extractor import extract_text_from_pdf
+from core.skill_extractor import extract_skills_from_jd
+from core.matcher import calculate_match
 from utils.text_utils import clean_text
-from core.extractor import extract_email, extract_phone, extract_skills
-from colorama import Fore, Style, init
 
-init(autoreset=True)
+# Define a set of common English stopwords to ignore while matching
+stopwords = {'and', 'with', 'the', 'of', 'in', 'to', 'for', 'a', 'an', 'on', 'at', 'is', 'are', 'as'}
 
-# 📍 Set CSV save location
-csv_file = r"D:\Data Science\AbiRa\Resume Analyzer\output\resume_analysis_results.csv"
+def load_text_from_file(file_path):
+    """
+    Load text from a PDF or text file.
+    """
+    if file_path.endswith('.pdf'):
+        return extract_text_from_pdf(file_path)
+    elif file_path.endswith('.txt'):
+        with open(file_path, 'r', encoding='utf-8') as f:
+            return f.read()
+    else:
+        return ""
 
-# Step 1: Ask user for resume file
-print(Fore.CYAN + "📄 Please provide your resume path (or press Enter to select from available PDFs):")
-resume_path = input("Resume Path: ").strip()
+def get_user_inputs():
+    """
+    Ask the user for resume folder and JD input method.
+    """
+    resume_folder = input("Enter the folder path where your resumes are stored (folder only!): ").strip()
 
-# If user leaves input empty, list PDFs to select
-if not resume_path:
-    pdf_dir = r"D:\Data Science\AbiRa\Resume Analyzer\data"
-    pdf_files = [f for f in os.listdir(pdf_dir) if f.endswith('.pdf')]
-    
-    if not pdf_files:
-        print(Fore.RED + "🚫 No PDF files found in 'data' folder. Please add a resume.")
+    # Check if resume folder is valid
+    if not os.path.isdir(resume_folder):
+        print("\n❌ Error: The path you entered is not a folder. Exiting.")
         exit()
 
-    print(Fore.YELLOW + "\nAvailable PDFs:")
-    for idx, pdf in enumerate(pdf_files, start=1):
-        print(f"{idx}. {pdf}")
-    
-    choice = int(input("\nEnter the number of the resume you want to select: "))
-    resume_path = os.path.join(pdf_dir, pdf_files[choice - 1])
+    jd_choice = input("Do you want to (1) Paste a Job Description manually, or (2) Select a JD folder? Enter 1 or 2: ").strip()
 
-# Verify file exists
-if not os.path.isfile(resume_path):
-    print(Fore.RED + f"🚫 Resume file not found: {resume_path}")
-    exit()
+    if jd_choice == '1':
+        pasted_jd = input("\nPaste your Job Description text here (then press Enter):\n").strip()
+        jd_texts = {"pasted_jd.txt": pasted_jd}
+    elif jd_choice == '2':
+        jd_folder = input("Enter the folder path where your job descriptions are stored: ").strip()
+        if not os.path.isdir(jd_folder):
+            print("\n❌ Error: The path you entered is not a folder. Exiting.")
+            exit()
 
-# Step 2: Ask user for JD text
-jd_text = input("\n📝 Paste the Job Description text: ").strip()
+        jd_files = [f for f in os.listdir(jd_folder) if f.lower().endswith(('.pdf', '.txt'))]
+        jd_texts = {}
+        for jd_file in jd_files:
+            jd_path = os.path.join(jd_folder, jd_file)
+            jd_texts[jd_file] = load_text_from_file(jd_path)
+    else:
+        print("Invalid choice. Exiting.")
+        exit()
 
-# Step 3: Extract and clean resume text
-raw_text = extract_resume_text(resume_path)
-cleaned_text = clean_text(raw_text)
+    return resume_folder, jd_texts
 
-# Step 4: Extract Email and Phone from Resume
-email = extract_email(raw_text)
-phone = extract_phone(raw_text)
+def main():
+    """
+    Main driver function.
+    """
+    # Get folder paths and JD inputs
+    resume_folder, jd_texts = get_user_inputs()
 
-# Step 5: Extract Required Skills from JD
-skills_database = [
-    "Python", "SQL", "Excel", "Power BI", "Tableau",
-    "Machine Learning", "Deep Learning", "Data Analysis", "Data Visualization",
-    "Natural Language Processing", "NLP", "Pandas", "NumPy", "Matplotlib", "Seaborn",
-    "Scikit-learn", "TensorFlow", "Keras", "PyTorch",
-    "Statistics", "Probability", "A/B Testing", "Hypothesis Testing",
-    "Business Intelligence", "ETL", "Data Warehousing", "Big Data",
-    "AWS", "Azure", "GCP", "Snowflake", "Databricks", "Apache Spark",
-    "Data Cleaning", "Data Wrangling", "Regression", "Classification",
-    "Clustering", "Time Series Analysis", "Dashboards", "SQL Queries", "Stored Procedures",
-    "Microsoft Excel", "Advanced Excel", "VLOOKUP", "Pivot Tables", "Power Query",
-    "Data Modeling", "Google Analytics", "Looker Studio", "Alteryx",
-    "Data Mining", "Data Engineering Basics"
-]
+    # Collect all resume files
+    resume_files = [f for f in os.listdir(resume_folder) if f.lower().endswith('.pdf')]
 
-required_skills = extract_skills(jd_text, skills_database)
-matched_skills = [skill for skill in required_skills if skill.lower() in cleaned_text.lower()]
+    # Handle if no resumes found
+    if not resume_files:
+        print("\n❌ No resumes found in the folder. Exiting.")
+        exit()
 
-# Step 6: Skill Match Score
-if required_skills:
-    match_score = round(len(matched_skills) / len(required_skills) * 100, 2)
-else:
-    match_score = 0.0
+    results = []
 
-# Step 7: Show Results
-print(Fore.GREEN + "\n📋 Resume Analysis Result:")
-print(f"Extracted Email: {email}")
-print(f"Extracted Phone: {phone}")
-print(f"Required Skills from JD: {required_skills}")
-print(f"Matched Skills: {matched_skills}")
-print(f"Skill Match Score: {match_score}%")
+    # Process each resume and each JD
+    for resume_file in resume_files:
+        resume_path = os.path.join(resume_folder, resume_file)
+        resume_text = clean_text(load_text_from_file(resume_path))
 
-# Step 8: Save the output to CSV
-file_exists = os.path.isfile(csv_file)
+        for jd_name, jd_content in jd_texts.items():
+            jd_content_clean = clean_text(jd_content)
+            jd_skills = extract_skills_from_jd(jd_content_clean)
 
-with open(csv_file, mode='a', newline='', encoding='utf-8') as file:
-    writer = csv.writer(file)
-    if not file_exists:
-        # write headers first if file doesn't exist
-        writer.writerow(["Email", "Phone", "Required Skills", "Matched Skills", "Match Score"])
+            # Remove common stopwords from skills
+            jd_skills = [skill for skill in jd_skills if skill not in stopwords]
 
-    writer.writerow([email, phone, ", ".join(required_skills), ", ".join(matched_skills), match_score])
+            match_percentage, matched_skills = calculate_match(resume_text, jd_skills)
+            results.append([resume_file, jd_name, round(match_percentage, 2), ', '.join(matched_skills)])
 
-print(Fore.CYAN + f"\n✅ Analysis result saved to {csv_file}")
+    # Sort results by Match Percentage descending
+    results = sorted(results, key=lambda x: x[2], reverse=True)
+
+    # Create output folder if not exists
+    os.makedirs('output', exist_ok=True)
+
+    # Create output filename with current timestamp
+    current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    output_path = f"output/resume_analysis_results_{current_time}.csv"
+
+    # Write results to CSV
+    with open(output_path, mode='w', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Resume Name', 'Job Description Name', 'Match Percentage', 'Matched Skills'])
+        writer.writerows(results)
+
+    print(f"\n[✔] Resume Matching Completed! Results saved at {output_path}")
+
+if __name__ == "__main__":
+    main()
