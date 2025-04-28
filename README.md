@@ -1,120 +1,82 @@
-# ✨ AbiRa - Resume Analyzer
+# 📄 Resume Analyzer (AbiRa)
 
-![Python](https://img.shields.io/badge/Python-3.9-blue) 
-![Status](https://img.shields.io/badge/Status-Active-brightgreen)
-![Contributions](https://img.shields.io/badge/Contributions-Welcome-ff69b4)
-
----
-
-## 📖 Project Description
-
-**AbiRa - Resume Analyzer** is a simple but powerful tool designed to analyze resumes against job descriptions.  
-It extracts key information (like email, phone, skills) from resumes and matches them with job requirements to calculate a skill match score — helping candidates or recruiters quickly assess resume-job fit.
+A smart and dynamic Resume Analyzer that matches multiple resumes against multiple job descriptions using real-time skill extraction and dynamic matching.  
+Built with love as part of AbiRa — my AI journey! 🚀
 
 ---
 
-## 🗂️ Folder Structure
+## 🚀 Features
 
-```
-Resume_Analyzer/
-│
-├── core/
-│   ├── analyzer.py
-│   ├── extractor.py
-│   ├── jd_parser.py
-│   ├── matcher.py
-│   ├── resume_parser.py
-│   ├── skill_extractor.py
-│   ├── tracker.py
-│
-├── data/
-│   ├── Abinasha sahoo-Resume old.pdf
-│   ├── Abinasha_Sahoo_Resume.pdf
-│   ├── sample_jd.txt
-│   ├── sample_resume.pdf
-│
-├── output/
-│   ├── applications_log.csv
-│   ├── resume_analysis_results.csv
-│
-├── utils/
-│   └── text_utils.py
-│
-├── .gitignore
-├── main.py
-├── README.md
-├── requirements.txt
-
-```
-
----
-
-## ⚙️ Features
-
-- 📄 Extracts email and phone number from resumes.
-- 🛠️ Cleans and preprocesses extracted resume text.
-- 🔎 Extracts required skills from provided Job Description.
-- 📊 Matches candidate's skills with JD skills and generates a skill match score.
-- 🧠 Handles dynamic user input (resume path, JD text) at runtime.
-- 📂 Saves result in CSV file for further use.
+- 📂 Upload multiple resumes (.pdf)
+- 📝 Paste job descriptions manually OR upload multiple JDs (.txt / .pdf)
+- 🔎 Dynamic keyword extraction (NLP-based)
+- 🧹 Stopwords cleaning for smarter matching
+- 📊 Auto-calculates match percentages
+- 📈 Results sorted by top matches
+- 🗂️ Clean CSV output with match % and matched skills
+- ⏱️ Timestamps on output files
+- ❌ Friendly error handling (wrong paths / missing files)
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Python 3.9**
-- **PyMuPDF** (`fitz`) for PDF text extraction
-- **re** (Regular Expressions) for pattern matching
-- **pandas** for data handling
-- **VS Code** for development
+- Python
+- PyMuPDF (PDF parsing)
+- Regular Expressions (skill extraction)
+- CSV module (output generation)
+- Clean modular codebase
 
 ---
 
-## 🚀 Setup Instructions
+## 📦 Installation
 
-1. **Clone the repository** (after pushing it on GitHub):
-
-    ```bash
-    git clone https://github.com/your-username/abira-resume-analyzer.git
-    ```
-
-2. **Navigate to the project folder**:
-
-    ```bash
-    cd abira-resume-analyzer
-    ```
-
-3. **Install required libraries**:
-
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-4. **Run the project**:
-
-    ```bash
-    python main.py
-    ```
-
-5. **Follow the prompts** to upload your resume and paste your job description!
+```bash
+git clone https://github.com/AbinashaSah00/Abira-resume-analyzer.git
+cd Abira-resume-analyzer
+pip install -r requirements.txt
+```
 
 ---
 
-## 🔮 Future Scope
+## 🚀 Usage
 
-- Upload multiple resumes and generate a ranking based on skill match score.
-- Add basic machine learning for automatic skill extraction.
-- Build a Streamlit web app for easier UI/UX.
-- Integrate resume parsing with LinkedIn Job Postings.
+```bash
+python main.py
+```
+- Enter resume folder path when asked.
+- Choose to paste a JD manually OR select a JD folder.
+- Get clean CSV output inside the `/output/` folder!
 
 ---
 
-## ✍️ Author
+## 📊 Output Example
 
-**Abinash Sahoo**  
-*"Believe it until you make it."*
-*"Building from rock bottom to relentless 🚀"*
+| Resume Name | Job Description | Match % | Skills Matched |
+|:------------|:----------------|:--------|:---------------|
+| resume_data_analyst.pdf | jd_data_analyst.txt | 40% | python, sql, data, analyst, power |
 
+_(Output file auto-generated with date and time stamp.)_
+
+---
+
+## 🎯 Future Work (Planned)
+
+- Add small Streamlit front-end for drag-drop UI
+- Integrate live job search APIs (Indeed, LinkedIn)
+- OCR handling for scanned resumes
+- Email notifications of best matches
+
+---
+
+## 🧑‍💻 Author
+
+- Abinash Sahoo
 - GitHub: [abinashsahoo00](https://github.com/abinashsahoo00)
 - LinkedIn: [Abinash Sahoo](https://www.linkedin.com/in/abinash-sahoo/)
 - Notion: [Abinash Sahoo](https://www.notion.so/Hey-there-I-am-Abinash-Sahoo-1dfe544fcbea80ef973eec9fd705f513?pvs=4)
+
+---
+
+**Believe it until you make it.** 🚀
+```
