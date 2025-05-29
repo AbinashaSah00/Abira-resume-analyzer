@@ -1,5 +1,7 @@
-# ✨ AbiRa - Resume Analyzer
 # Abeera V1.0 🤖 - The Smart JD-Resume CLI Matcher
+![Python](https://img.shields.io/badge/Python-3.9-blue) 
+![Status](https://img.shields.io/badge/Status-Active-brightgreen)
+![Contributions](https://img.shields.io/badge/Contributions-Welcome-ff69b4)
 
 **Abeera** (short for *AI-Based Resume Analyzer*) is a smart, local-first assistant designed to analyze your resume against any Job Description (JD) using lightweight LLMs, NLP pipelines, and a flexible scoring framework.
 
