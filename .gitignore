@@ -12,3 +12,6 @@ venv/
 # Ignore system files
 .DS_Store
 Thumbs.db
+
+llm/bin/models/
+*.gguf

@@ -1,4 +1,33 @@
-PyMuPDF
-spacy
-pandas
-scikit-learn
+# Core LLM and subprocess interaction
+openai
+# ^ Only if you plan to switch to OpenAI API in the future
+
+# PDF resume parsing
+PyMuPDF==1.23.2         # For extracting text from PDF resumes
+
+# Data parsing and logic
+regex
+unidecode               # Optional for cleaning extracted text
+python-dateutil         # For timestamp formatting if extended
+pandas                  # Used if analysis is expanded
+
+# LLM integration logic via local exe
+# No pip package needed — llama-run.exe is directly called
+
+# Utility
+colorama                # Optional, for colored terminal outputs
+tqdm                    # For any progress bars if used later
+
+# Dev and Logging
+rich                    # Pretty CLI output (optional)
+
+
+flashtext==2.7
+pdfplumber==0.10.2
+python-docx==1.1.0
+pandas==2.2.2
+numpy==1.26.4
+scikit-learn==1.4.2
+requests==2.31.0
+tqdm==4.66.2
+python-dotenv==1.0.1

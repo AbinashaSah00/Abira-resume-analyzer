@@ -1,0 +1,15 @@
+company
+bonus
+benefit
+culture
+race
+religion
+color
+vision
+successful
+flexibility
+environment
+background
+regulation
+life
+leave

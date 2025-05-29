@@ -1,0 +1,27 @@
+python
+sql
+excel
+power bi
+tableau
+airflow
+jupyter
+kafka
+influxdb
+anomaly detection
+statistical analysis
+bigquery
+snowflake
+grafana
+json
+csv
+statistics
+machine learning
+deep learning
+data visualization
+communication
+problem solving
+project management
+product management
+hive
+vba
+sas

@@ -1,110 +1,122 @@
 # main.py
 
+
 import os
-import csv
-from datetime import datetime
-from core.extractor import extract_text_from_pdf
-from core.skill_extractor import extract_skills_from_jd
-from core.matcher import calculate_match
-from utils.text_utils import clean_text
+import time
+import sys
+from pathlib import Path
 
-# Define a set of common English stopwords to ignore while matching
-stopwords = {'and', 'with', 'the', 'of', 'in', 'to', 'for', 'a', 'an', 'on', 'at', 'is', 'are', 'as'}
+from core.title_extractor import TitleExtractor
+from core.fast_skill_extractor import FastSkillExtractor
+from core.skill_gap_detector import SkillGapDetector
+from core.profile_scorecard import compute_profile_score
+from llm.abeera_llm import ask_llama_local
 
-def load_text_from_file(file_path):
-    """
-    Load text from a PDF or text file.
-    """
-    if file_path.endswith('.pdf'):
-        return extract_text_from_pdf(file_path)
-    elif file_path.endswith('.txt'):
-        with open(file_path, 'r', encoding='utf-8') as f:
-            return f.read()
-    else:
+from PyPDF2 import PdfReader
+
+def extract_text_from_pdf(file_path):
+    try:
+        reader = PdfReader(file_path)
+        text = "\n".join(page.extract_text() or "" for page in reader.pages)
+        return text.strip()
+    except Exception as e:
+        print(f"❌ Error reading PDF: {e}")
         return ""
 
-def get_user_inputs():
-    """
-    Ask the user for resume folder and JD input method.
-    """
-    resume_folder = input("Enter the folder path where your resumes are stored (folder only!): ").strip()
-
-    # Check if resume folder is valid
-    if not os.path.isdir(resume_folder):
-        print("\n❌ Error: The path you entered is not a folder. Exiting.")
-        exit()
-
-    jd_choice = input("Do you want to (1) Paste a Job Description manually, or (2) Select a JD folder? Enter 1 or 2: ").strip()
-
-    if jd_choice == '1':
-        pasted_jd = input("\nPaste your Job Description text here (then press Enter):\n").strip()
-        jd_texts = {"pasted_jd.txt": pasted_jd}
-    elif jd_choice == '2':
-        jd_folder = input("Enter the folder path where your job descriptions are stored: ").strip()
-        if not os.path.isdir(jd_folder):
-            print("\n❌ Error: The path you entered is not a folder. Exiting.")
-            exit()
-
-        jd_files = [f for f in os.listdir(jd_folder) if f.lower().endswith(('.pdf', '.txt'))]
-        jd_texts = {}
-        for jd_file in jd_files:
-            jd_path = os.path.join(jd_folder, jd_file)
-            jd_texts[jd_file] = load_text_from_file(jd_path)
+def classify_fit(score):
+    if score >= 70:
+        return "HIGH"
+    elif score >= 40:
+        return "MEDIUM"
     else:
-        print("Invalid choice. Exiting.")
-        exit()
-
-    return resume_folder, jd_texts
+        return "LOW"
 
 def main():
-    """
-    Main driver function.
-    """
-    # Get folder paths and JD inputs
-    resume_folder, jd_texts = get_user_inputs()
+    print("\n🚀 Welcome to Abeera CLI - Smart JD & Resume Analyzer")
 
-    # Collect all resume files
-    resume_files = [f for f in os.listdir(resume_folder) if f.lower().endswith('.pdf')]
+    # Step 1: Load Resume
+    resume_path = input("📁 Enter path to your resume PDF: ").strip()
+    if not Path(resume_path).exists():
+        print("❌ Resume file not found!")
+        sys.exit(1)
+    resume_text = extract_text_from_pdf(resume_path)
 
-    # Handle if no resumes found
-    if not resume_files:
-        print("\n❌ No resumes found in the folder. Exiting.")
-        exit()
+    # Step 2: Paste JD
+    print("\n📝 Paste the Job Description (JD) below. Press ENTER twice to finish:\n")
+    jd_lines = []
+    while True:
+        line = input()
+        if line.strip() == "":
+            break
+        jd_lines.append(line)
+    jd_text = "\n".join(jd_lines)
 
-    results = []
+    # Step 3: Extract Titles and Skills
+    title_extractor = TitleExtractor()
+    skill_extractor = FastSkillExtractor()
 
-    # Process each resume and each JD
-    for resume_file in resume_files:
-        resume_path = os.path.join(resume_folder, resume_file)
-        resume_text = clean_text(load_text_from_file(resume_path))
+    jd_title, _, _ = title_extractor.extract(jd_text, source="jd")
+    resume_title, _, _ = title_extractor.extract(resume_text, source="resume")
+    jd_skills = skill_extractor.extract_skills(jd_text, source="jd")
+    resume_skills = skill_extractor.extract_skills(resume_text, source="resume")
 
-        for jd_name, jd_content in jd_texts.items():
-            jd_content_clean = clean_text(jd_content)
-            jd_skills = extract_skills_from_jd(jd_content_clean)
+    print(f"\n📌 JD Title: {jd_title}")
+    print(f"📄 Resume Title: {resume_title}")
+    print(f"🛠️ JD Skills: {jd_skills}")
+    print(f"🧠 Resume Skills: {resume_skills}")
 
-            # Remove common stopwords from skills
-            jd_skills = [skill for skill in jd_skills if skill not in stopwords]
+    # Step 4: Skill Gap Detection
+    gapper = SkillGapDetector(jd_skills, resume_skills)
+    gap_summary = gapper.gap_summary()
 
-            match_percentage, matched_skills = calculate_match(resume_text, jd_skills)
-            results.append([resume_file, jd_name, round(match_percentage, 2), ', '.join(matched_skills)])
+    print("\n📊 Skill Gap Summary")
+    print(f"✅ Matched: {len(gap_summary['fully_matched'])}")
+    print(f"🤝 Partial Matches: {len(gap_summary['partial_matches'])}")
+    print(f"❌ Missing: {len(gap_summary['missing'])}")
+    print(f"📌 Recommended Gaps: {gap_summary['recommended_gaps']}")
 
-    # Sort results by Match Percentage descending
-    results = sorted(results, key=lambda x: x[2], reverse=True)
+    # Step 5: Suggest Learning
+    print("\n📚 Suggested Learning Paths:")
+    for skill in gap_summary['recommended_gaps']:
+        url = f"https://www.google.com/search?q=learn+{skill.replace(' ', '+')}"
+        print(f"🔹 {skill.title()} → Google Search | Learn {skill} | {url}")
 
-    # Create output folder if not exists
-    os.makedirs('output', exist_ok=True)
+    # Step 6: Scorecard
+    scorecard = compute_profile_score(
+        jd_titles=[jd_title],
+        resume_titles=[resume_title],
+        jd_skills=jd_skills,
+        resume_skills=resume_skills,
+        experience_years=1.5,  # Placeholder, could be extracted later
+        jd_degrees=["b.tech"],  # Placeholder
+        resume_degrees=["bba"]  # Placeholder
+    )
 
-    # Create output filename with current timestamp
-    current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    output_path = f"output/resume_analysis_results_{current_time}.csv"
+    scores = scorecard.get("scores", {})
+    fit = classify_fit(scores.get("total", 0))
 
-    # Write results to CSV
-    with open(output_path, mode='w', newline='', encoding='utf-8') as file:
-        writer = csv.writer(file)
-        writer.writerow(['Resume Name', 'Job Description Name', 'Match Percentage', 'Matched Skills'])
-        writer.writerows(results)
+    print("\n📋 Profile Match Scorecard")
+    print(f"🎯 Skill Match         : {scores.get('skills', 0)} / 40")
+    print(f"👤 Title Match         : {scores.get('title_match', 0)} / 20")
+    print(f"⏳ Experience Duration : {scores.get('experience_duration', 0)} / 20")
+    print(f"🛠️ Tool Match          : {scores.get('tools', 0)} / 10")
+    print(f"🎓 Education Match     : {scores.get('education_match', 0)} / 10")
+    print(f"✅ Total Profile Score : {scores.get('total', 0)} / 100")
+    print(f"\n📌 Fit Level: {fit}")
 
-    print(f"\n[✔] Resume Matching Completed! Results saved at {output_path}")
+    # Step 7: Chat mode
+    print("\n🤖 Abeera is ready for your questions (type 'bye bye' to exit):")
+    while True:
+        user_input = input("\n🗣️ You: ").strip()
+        if user_input.lower() == "bye bye":
+            print("👋 Goodbye!")
+            break
+        if not user_input:
+            continue
+
+        ai_response = ask_llama_local(user_input)
+        print(f"🤖 Abeera: {ai_response}")
 
 if __name__ == "__main__":
     main()
+
