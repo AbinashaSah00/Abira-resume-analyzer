@@ -1,95 +1,122 @@
 # main.py
 
+
 import os
-import csv
-from core.resume_parser import extract_resume_text
-from utils.text_utils import clean_text
-from core.extractor import extract_email, extract_phone, extract_skills
-from colorama import Fore, Style, init
+import time
+import sys
+from pathlib import Path
 
-init(autoreset=True)
+from core.title_extractor import TitleExtractor
+from core.fast_skill_extractor import FastSkillExtractor
+from core.skill_gap_detector import SkillGapDetector
+from core.profile_scorecard import compute_profile_score
+from llm.abeera_llm import ask_llama_local
 
-# 📍 Set CSV save location
-csv_file = r"D:\Data Science\AbiRa\Resume Analyzer\output\resume_analysis_results.csv"
+from PyPDF2 import PdfReader
 
-# Step 1: Ask user for resume file
-print(Fore.CYAN + "📄 Please provide your resume path (or press Enter to select from available PDFs):")
-resume_path = input("Resume Path: ").strip()
+def extract_text_from_pdf(file_path):
+    try:
+        reader = PdfReader(file_path)
+        text = "\n".join(page.extract_text() or "" for page in reader.pages)
+        return text.strip()
+    except Exception as e:
+        print(f"❌ Error reading PDF: {e}")
+        return ""
 
-# If user leaves input empty, list PDFs to select
-if not resume_path:
-    pdf_dir = r"D:\Data Science\AbiRa\Resume Analyzer\data"
-    pdf_files = [f for f in os.listdir(pdf_dir) if f.endswith('.pdf')]
-    
-    if not pdf_files:
-        print(Fore.RED + "🚫 No PDF files found in 'data' folder. Please add a resume.")
-        exit()
+def classify_fit(score):
+    if score >= 70:
+        return "HIGH"
+    elif score >= 40:
+        return "MEDIUM"
+    else:
+        return "LOW"
 
-    print(Fore.YELLOW + "\nAvailable PDFs:")
-    for idx, pdf in enumerate(pdf_files, start=1):
-        print(f"{idx}. {pdf}")
-    
-    choice = int(input("\nEnter the number of the resume you want to select: "))
-    resume_path = os.path.join(pdf_dir, pdf_files[choice - 1])
+def main():
+    print("\n🚀 Welcome to Abeera CLI - Smart JD & Resume Analyzer")
 
-# Verify file exists
-if not os.path.isfile(resume_path):
-    print(Fore.RED + f"🚫 Resume file not found: {resume_path}")
-    exit()
+    # Step 1: Load Resume
+    resume_path = input("📁 Enter path to your resume PDF: ").strip()
+    if not Path(resume_path).exists():
+        print("❌ Resume file not found!")
+        sys.exit(1)
+    resume_text = extract_text_from_pdf(resume_path)
 
-# Step 2: Ask user for JD text
-jd_text = input("\n📝 Paste the Job Description text: ").strip()
+    # Step 2: Paste JD
+    print("\n📝 Paste the Job Description (JD) below. Press ENTER twice to finish:\n")
+    jd_lines = []
+    while True:
+        line = input()
+        if line.strip() == "":
+            break
+        jd_lines.append(line)
+    jd_text = "\n".join(jd_lines)
 
-# Step 3: Extract and clean resume text
-raw_text = extract_resume_text(resume_path)
-cleaned_text = clean_text(raw_text)
+    # Step 3: Extract Titles and Skills
+    title_extractor = TitleExtractor()
+    skill_extractor = FastSkillExtractor()
 
-# Step 4: Extract Email and Phone from Resume
-email = extract_email(raw_text)
-phone = extract_phone(raw_text)
+    jd_title, _, _ = title_extractor.extract(jd_text, source="jd")
+    resume_title, _, _ = title_extractor.extract(resume_text, source="resume")
+    jd_skills = skill_extractor.extract_skills(jd_text, source="jd")
+    resume_skills = skill_extractor.extract_skills(resume_text, source="resume")
 
-# Step 5: Extract Required Skills from JD
-skills_database = [
-    "Python", "SQL", "Excel", "Power BI", "Tableau",
-    "Machine Learning", "Deep Learning", "Data Analysis", "Data Visualization",
-    "Natural Language Processing", "NLP", "Pandas", "NumPy", "Matplotlib", "Seaborn",
-    "Scikit-learn", "TensorFlow", "Keras", "PyTorch",
-    "Statistics", "Probability", "A/B Testing", "Hypothesis Testing",
-    "Business Intelligence", "ETL", "Data Warehousing", "Big Data",
-    "AWS", "Azure", "GCP", "Snowflake", "Databricks", "Apache Spark",
-    "Data Cleaning", "Data Wrangling", "Regression", "Classification",
-    "Clustering", "Time Series Analysis", "Dashboards", "SQL Queries", "Stored Procedures",
-    "Microsoft Excel", "Advanced Excel", "VLOOKUP", "Pivot Tables", "Power Query",
-    "Data Modeling", "Google Analytics", "Looker Studio", "Alteryx",
-    "Data Mining", "Data Engineering Basics"
-]
+    print(f"\n📌 JD Title: {jd_title}")
+    print(f"📄 Resume Title: {resume_title}")
+    print(f"🛠️ JD Skills: {jd_skills}")
+    print(f"🧠 Resume Skills: {resume_skills}")
 
-required_skills = extract_skills(jd_text, skills_database)
-matched_skills = [skill for skill in required_skills if skill.lower() in cleaned_text.lower()]
+    # Step 4: Skill Gap Detection
+    gapper = SkillGapDetector(jd_skills, resume_skills)
+    gap_summary = gapper.gap_summary()
 
-# Step 6: Skill Match Score
-if required_skills:
-    match_score = round(len(matched_skills) / len(required_skills) * 100, 2)
-else:
-    match_score = 0.0
+    print("\n📊 Skill Gap Summary")
+    print(f"✅ Matched: {len(gap_summary['fully_matched'])}")
+    print(f"🤝 Partial Matches: {len(gap_summary['partial_matches'])}")
+    print(f"❌ Missing: {len(gap_summary['missing'])}")
+    print(f"📌 Recommended Gaps: {gap_summary['recommended_gaps']}")
 
-# Step 7: Show Results
-print(Fore.GREEN + "\n📋 Resume Analysis Result:")
-print(f"Extracted Email: {email}")
-print(f"Extracted Phone: {phone}")
-print(f"Required Skills from JD: {required_skills}")
-print(f"Matched Skills: {matched_skills}")
-print(f"Skill Match Score: {match_score}%")
+    # Step 5: Suggest Learning
+    print("\n📚 Suggested Learning Paths:")
+    for skill in gap_summary['recommended_gaps']:
+        url = f"https://www.google.com/search?q=learn+{skill.replace(' ', '+')}"
+        print(f"🔹 {skill.title()} → Google Search | Learn {skill} | {url}")
 
-# Step 8: Save the output to CSV
-file_exists = os.path.isfile(csv_file)
+    # Step 6: Scorecard
+    scorecard = compute_profile_score(
+        jd_titles=[jd_title],
+        resume_titles=[resume_title],
+        jd_skills=jd_skills,
+        resume_skills=resume_skills,
+        experience_years=1.5,  # Placeholder, could be extracted later
+        jd_degrees=["b.tech"],  # Placeholder
+        resume_degrees=["bba"]  # Placeholder
+    )
 
-with open(csv_file, mode='a', newline='', encoding='utf-8') as file:
-    writer = csv.writer(file)
-    if not file_exists:
-        # write headers first if file doesn't exist
-        writer.writerow(["Email", "Phone", "Required Skills", "Matched Skills", "Match Score"])
+    scores = scorecard.get("scores", {})
+    fit = classify_fit(scores.get("total", 0))
 
-    writer.writerow([email, phone, ", ".join(required_skills), ", ".join(matched_skills), match_score])
+    print("\n📋 Profile Match Scorecard")
+    print(f"🎯 Skill Match         : {scores.get('skills', 0)} / 40")
+    print(f"👤 Title Match         : {scores.get('title_match', 0)} / 20")
+    print(f"⏳ Experience Duration : {scores.get('experience_duration', 0)} / 20")
+    print(f"🛠️ Tool Match          : {scores.get('tools', 0)} / 10")
+    print(f"🎓 Education Match     : {scores.get('education_match', 0)} / 10")
+    print(f"✅ Total Profile Score : {scores.get('total', 0)} / 100")
+    print(f"\n📌 Fit Level: {fit}")
 
-print(Fore.CYAN + f"\n✅ Analysis result saved to {csv_file}")
+    # Step 7: Chat mode
+    print("\n🤖 Abeera is ready for your questions (type 'bye bye' to exit):")
+    while True:
+        user_input = input("\n🗣️ You: ").strip()
+        if user_input.lower() == "bye bye":
+            print("👋 Goodbye!")
+            break
+        if not user_input:
+            continue
+
+        ai_response = ask_llama_local(user_input)
+        print(f"🤖 Abeera: {ai_response}")
+
+if __name__ == "__main__":
+    main()
+

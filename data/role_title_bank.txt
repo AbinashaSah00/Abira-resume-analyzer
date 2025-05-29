@@ -1,0 +1,97 @@
+data analyst
+business analyst
+product manager
+software engineer
+machine learning engineer
+ai engineer
+data scientist
+cloud architect
+site reliability engineer
+backend developer
+frontend developer
+full stack developer
+android developer
+ios developer
+web developer
+ux designer
+ui designer
+qa engineer
+automation tester
+devops engineer
+network engineer
+cybersecurity analyst
+system administrator
+bi developer
+etl developer
+database administrator
+project manager
+technical program manager
+scrum master
+agile coach
+solutions architect
+platform engineer
+support engineer
+financial analyst
+risk analyst
+accountant
+hr manager
+recruiter
+operations manager
+marketing analyst
+seo specialist
+digital marketing manager
+social media manager
+content writer
+graphic designer
+video editor
+legal associate
+paralegal
+business development manager
+sales executive
+presales consultant
+data engineer
+nlp engineer
+deep learning engineer
+robotics engineer
+blockchain developer
+game developer
+unity developer
+data visualization specialist
+tableau developer
+power bi developer
+cloud engineer
+aws engineer
+azure architect
+gcp architect
+python developer
+rpa developer
+ai researcher
+data strategist
+information security analyst
+sap consultant
+oracle dba
+mobile app developer
+release manager
+kubernetes engineer
+docker specialist
+it consultant
+tech support analyst
+helpdesk technician
+hardware engineer
+crm consultant
+zendesk admin
+workday analyst
+analytics engineer
+data quality analyst
+data governance analyst
+mlops engineer
+llm engineer
+prompt engineer
+founder
+co-founder
+cto
+ceo
+about the jobjob title data analystlocation bangaloreexperience yearsavailable for ff interview on friday yes nolocation for drive bhive indiranagarrole overviewwe are seeking a skilled data analyst to support our platform powering operationalintelligence across airports and similar sectors the ideal candidate will haveexperience working with timeseries datasets and operational information to uncovertrends anomalies and actionable insights this role will work closely with dataengineers ml teams and domain experts to turn raw data into meaningfulintelligence for business and operations stakeholderskey responsibilitiesanalyze timeseries and sensor data from various sourcesdevelop and maintain dashboards reports and visualizations tocommunicate key metrics and trendscorrelate data from multiple systems vision weather flight schedules etc toprovide holistic insightscollaborate with aiml teams to support model validation and interpret aidriven alerts eg anomalies intrusion detectionprepare and clean datasets for analysis and modeling ensure data qualityand consistencywork with stakeholders to understand reporting needs and deliver businessoriented outputsqualifications required skillsbachelors or masters degree in data science statistics computer scienceengineering or a related field years of experience in a data analyst role ideally in a technicalindustrialdomainstrong sql skills and proficiency with bireporting tools eg power bitableau grafanahandson experience analyzing structured and semistructured data jsoncsv timeseriesproficiency in python or r for data manipulation and exploratory analysisunderstanding of timeseries databases or streaming data eg influxdbkafka kinesissolid grasp of statistical analysis and anomaly detection methodsexperience working with data from industrial systems or largescale physicalinfrastructuregoodtohave skillsdomain experience in airports smart infrastructure transportation orlogisticsfamiliarity with data platforms snowflake bigquery custombuilt usingopensourceexposure to tools like airflow jupyter notebooks and data qualityframeworksbasic understanding of aiml workflows and data preparation requirements
+abinash sahoo rourkela odisha india abinashasahoogmailcom linkedin github professional summary resultsdriven data analyst skilled in sql python excel tableau and power bi adept at transforming complex datasets into actionable insights to enhance operational efficiency reporting workflows and datadriven decision making collaborative and detailoriented with a strong ability to communicate analytical findings to both technical and nontechnical stakeholders technical skills programming python pandas numpy matplotlib seaborn scikitlearn sql excel pivot tables vlookup sumifs index match visualization power bi tableau ms powerpoint data analysis data cleansing eda statistical analysis workflow automation tools jupyter notebook github professional experience data analyst reporting visualization genpact bangalore dec jan boosted business performance by through reporting insights resolved of critical issues reduced resolution time by improved data accuracy by via excel optimization cut report prep time enhanced dashboard access for teams collaborated with crossfunctional teams to align analytics solutions with business goals data analytics intern urban cooperative bank rourkela jan feb increased risk evaluation accuracy by through datadriven lending streamlined approvals by promoted rise in deposits projects youtube trend analysis nov dec github link analyzed k videos identified engagement trends found correlation between likescomments airbnb data analysis sep oct github link explored k listings forecasted demand with accuracy suggested revenue lift through data insights olympics data analysis jul aug github link processed k records revealed medal trends and demographics certifications bex ai tools workshop bex apr view master power bi and ai codingninjas apr view data science and ml course completed functionup ongoing python for beginners simplilearn feb view education bachelor of business administration bba sambalpur university odisha higher secondary chse odisha matriculation bse odisha
+sr data engineerbengaluruindiainformation technologyjob descriptionyour responsibilitieswe are seeking an experienced
+sr data engineerbengaluruindiainformation technologyjob descriptionyour responsibilitieswe are seeking
